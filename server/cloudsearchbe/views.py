@@ -17,8 +17,6 @@ def home(request):
 
 @csrf_exempt
 def find_keywords(request):
-    """Totally ignores the request since we're not focusing on this function.
-    => Sends a dummy stuff"""
     text = request.POST.get('text')
     kw = el.find_keywords(text)
     context = {"keywords": kw}
@@ -27,6 +25,7 @@ def find_keywords(request):
 
 @csrf_exempt
 def get_search_fetch(request):
+    print("in get_search_fetch")
     kws = json.loads(request.POST.get('keywords')) # a list of keywords
     query = " ".join(kw for kw in kws) # a string of keywords
     ln_info = p.google_to_json(query) # a list of jsons
@@ -34,6 +33,14 @@ def get_search_fetch(request):
                "links": ln_info
     }
     return HttpResponse(json.dumps(context), content_type="application/json")
+
+
+@csrf_exempt
+def get_res_by_types(request):
+    kws_with_types = json.loads(request.POST.get('keywords'))
+    context = p.get_search_fetch_by_types(kws_with_types)
+    return HttpResponse(json.dumps(context), content_type="application/json")
+
 
 
 def get_engines(request):
