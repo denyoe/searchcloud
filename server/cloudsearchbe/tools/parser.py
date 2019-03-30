@@ -10,7 +10,7 @@ SearchResult = namedtuple("SearchResult", "link title desc rank origin")
 
 # Function to use in the web API
 def google_to_json(query):
-    return export_results(google_search(query))
+    return json.loads(export_results(google_search(query)))
 
 
 def google_search(query):
