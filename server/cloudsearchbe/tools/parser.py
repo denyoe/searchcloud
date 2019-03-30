@@ -127,15 +127,15 @@ def youtube_parse_results(html, number_results):
 
 def export_results(results):
     ans = '['
-	length = len(results)
-	inc = 1
+    length = len(results)
+    inc = 1
     for result in results:
-		if length == inc:
-			ans += json.dumps(result._asdict())
-		else:
-			ans += json.dumps(result._asdict()) + ', '
-			
-		inc += 1
+        if length == inc:
+            ans += json.dumps(result._asdict())
+        else:
+            ans += json.dumps(result._asdict()) + ', '
+
+        inc += 1
 
     ans += ']'
     print(ans)
