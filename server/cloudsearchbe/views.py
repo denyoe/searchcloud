@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-import cloudsearchbe.tools as t
+import cloudsearchbe.tools.parser as p
 
 
 # Create your views here.
@@ -24,10 +24,10 @@ def find_keywords(request):
 
 
 @csrf_exempt
-def search_fetch(request):
-    kws = request.POST.get('keywords') # a list of keywords
+def get_search_fetch(request):
+    kws = json.loads(request.POST.get('keywords')) # a list of keywords
     query = " ".join(kw for kw in kws) # a string of keywords
-    ln_info = t.parser.google_to_json(query)
+    ln_info = p.google_to_json(query) # a list of jsons
     context = {"content": query,
                "links": ln_info
     }
