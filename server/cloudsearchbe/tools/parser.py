@@ -276,3 +276,41 @@ if __name__ == '__main__':
     for result in youtube_results:
         print(result)
         print('-------')
+		
+
+# New PART IMAGES
+
+def image_to_json(query):
+    return export_results(image_search(query))
+
+
+def image_search(query):
+    html = image_fetch_results(query)
+    return image_parse_results(html, 5)
+
+
+def image_fetch_results(query):
+    query = query.replace(' ', '+')
+    url = 'https://www.google.com/search?tbm=isch&source=lnms&q={}'.format(query)
+    response = requests.get(url, headers=USER_AGENT)
+    response.raise_for_status()
+
+    return response.text
+
+
+def image_parse_results(html, number_results):
+    soup = BeautifulSoup(html, 'html.parser')
+
+    result_list = []
+    result_index = 1
+    result_html_set = soup.find_all('div', attrs={'class': 'rg_meta'})
+
+    metadata_dicts = (json.loads(e.text) for e in result_html_set)
+    link_type_records = ((d["ou"], d["ity"]) for d in metadata_dicts)
+    images = itertools.islice(link_type_records, number_results)
+    for i, (url, image_type) in enumerate(images):
+        result_list.append(SearchResult(link=url, title='', desc='', rank=result_index, origin='IMAGE'))
+        result_index += 1
+
+    return result_list
+# New PART IMAGES
