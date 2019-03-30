@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './TextEditor.css';
 import { Editor } from 'slate-react';
 import { Value, Data } from 'slate';
-import Highlight from './Highlight';
+import Highlight from '../Highlight';
 import { TXT } from './sample.js';
 
 const initialValue = Value.fromJSON({
@@ -26,35 +26,53 @@ const initialValue = Value.fromJSON({
     }
 })
 
-const renderMark = (props, editor, next) => {
-    const { children, mark, attributes } = props
-    switch (mark.type) {
-        case 'bold':
-            return <strong {...{ attributes }}>{children}</strong>
-        case 'italic':
-            return <em {...{ attributes }}>{children}</em>
-        case 'code':
-            return <code {...{ attributes }}>{children}</code>
-        case 'underline':
-            return <u {...{ attributes }}>{children}</u>
-        case 'strikethrough':
-            return <strike {...{ attributes }}>{children}</strike>
-        case 'highlight':
-            return <Highlight {...props} color="yellow" />
-        default:
-            return next()
+// const initialResults = () => {
+//     return (
+//         <div className="c-inital">
+//             <h4>Google</h4>
+//             <ul>
+//                 <li><a href="">link</a></li>
+//                 <li><a href="">link</a></li>
+//                 <li><a href="">link</a></li>
+//             </ul>
+//         </div>
+//     )
+// }
+
+const Results = (props) => {
+    const { links } = props
+
+    if( links.length ) {
+        return (
+            <div className="c-item">
+                <h4>Google</h4>
+                <ul>
+                    { links.map(link => {
+                        return <li><a target="_" href={link}>click me</a></li>
+                    }) }
+                </ul>
+            </div>
+        )
+    } else {
+        return (
+            <div className="c-inital">
+                Select a Section and Press <em>Ctrl+H</em> to analysis
+            </div>
+        )
     }
+    
 }
 
-const markPlugin = () => {
-    return {
-        renderMark
-    }
-}
-
-const plugins = [
-    markPlugin()
-]
+// const initialResults = `
+//     <div className="c-inital">
+//         <h4>Google</h4>
+//         <ul>
+//             <li><a href="">link</a></li>
+//             <li><a href="">link</a></li>
+//             <li><a href="">link</a></li>
+//         </ul>
+//     </div>
+// `
 
 const results = {
     keywords: [
@@ -88,6 +106,36 @@ export default class TextEditor extends Component {
 
     decorations = []
 
+    renderMark = (props, editor, next) => {
+        const { children, mark, attributes } = props
+        switch (mark.type) {
+            case 'bold':
+                return <strong {...{ attributes }}>{children}</strong>
+            case 'italic':
+                return <em {...{ attributes }}>{children}</em>
+            case 'code':
+                return <code {...{ attributes }}>{children}</code>
+            case 'underline':
+                return <u {...{ attributes }}>{children}</u>
+            case 'strikethrough':
+                return <strike {...{ attributes }}>{children}</strike>
+            case 'highlight':
+                return <Highlight {...props} color="yellow" setResults={this.setResults} />
+            default:
+                return next()
+        }
+    }
+
+    markPlugin() {
+        return {
+            renderMark: this.renderMark
+        }
+    }
+
+    plugins = [
+        this.markPlugin()
+    ]
+
     /**
      * Store a reference to the `editor`.
      *
@@ -102,45 +150,24 @@ export default class TextEditor extends Component {
         super(props)
 
         this.state = {
-            value: initialValue
+            value: initialValue,
+            links: []
         }
     }
 
     componentDidMount() {
-        // console.log(results)
-        // const value = apply(this.state.value, {
-        //     type: 'remove_text',
-        //     path: List,
-        //     offset: Number,
-        //     text: String,
-        //     data: Map,
-        // })
-
-        // const markop = {
-        //     type: 'add_mark',
-        //     path: List,
-        //     offset: Number,
-        //     length: Number,
-        //     mark: Mark,
-        //     data: Map,
-        // }
-
-        // this.setState({ value })
-        
-
         this.mapKeywords(results.keywords)
     }
 
     mapKeywords = (keywords) => {
         keywords.map(keyword => {
             this.highlight(keyword)
-            // this.highlight('summer')
         })
     }
 
     highlight(keyword, color = 'yellow') {
         const { editor } = this
-        const { content, links } = keyword
+        const { content } = keyword
         const { value } = editor
         const texts = value.document.getTexts()
         // const decorations = []
@@ -170,6 +197,10 @@ export default class TextEditor extends Component {
         })
     }
 
+    setResults = (links) => {
+        this.setState({links})
+    }
+
     onChange = ({ value }) => {
         this.setState({ value })
     }
@@ -177,7 +208,6 @@ export default class TextEditor extends Component {
     onKeyDown = (e, editor, next) => {
         // cancel actions not starting with Ctrl key press
         if(! e.ctrlKey )    return next()
-
         e.preventDefault()
 
         switch (e.key) {
@@ -195,16 +225,29 @@ export default class TextEditor extends Component {
     }
 
     render() {
+        // let RESULTS
+        // if( this.state.results !== '' ) {
+        //     RESULTS = <initialResults />
+        // } else {
+        //     RESULTS = 'dd'
+        // }
+
         return(
-            <div className="c-text">
-                <Editor 
-                    plugins={plugins}
-                    ref={this.ref}
-                    defaultValue={this.state.value}
-                    schema={this.schema}
-                    onChange={this.onChange} 
-                    onKeyDown={this.onKeyDown}
-                />
+            <div className="c-main">
+                <div className="c-text">
+                    <Editor
+                        plugins={this.plugins}
+                        ref={this.ref}
+                        defaultValue={this.state.value}
+                        schema={this.schema}
+                        onChange={this.onChange}
+                        onKeyDown={this.onKeyDown}
+                    />
+                </div>
+                <div className="c-results">
+                    {/* <i class="fas fa-igloo"></i> */}
+                    <Results links={this.state.links} />
+                </div>
             </div>
         )
     }
