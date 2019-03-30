@@ -119,7 +119,7 @@ def youtube_parse_results(html, number_results):
             title = title.get_text()
             description = description.get_text()
             result_list.append(
-                SearchResult(link=link, title=title, desc=description, rank=result_index, origin='SCHOLAR'))
+                SearchResult(link=link, title=title, desc=description, rank=result_index, origin='YOUTUBE'))
             result_index += 1
 
     return result_list
@@ -127,8 +127,15 @@ def youtube_parse_results(html, number_results):
 
 def export_results(results):
     ans = '['
+	length = len(results)
+	inc = 1
     for result in results:
-        ans += json.dumps(result._asdict()) + ', '
+		if length == inc:
+			ans += json.dumps(result._asdict())
+		else:
+			ans += json.dumps(result._asdict()) + ', '
+			
+		inc += 1
 
     ans += ']'
     print(ans)
