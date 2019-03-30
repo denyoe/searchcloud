@@ -15,7 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf.urls import include, url
+
+import cloudsearchbe.views as views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^', include('cloudsearchbe.urls')),
 ]
