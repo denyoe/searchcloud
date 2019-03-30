@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 import cloudsearchbe.tools.parser as p
-import cloudsearchbe.tools.dao as dao # TODO useful??
+import cloudsearchbe.tools.elementary as el
 
 
 # Create your views here.
@@ -17,9 +17,10 @@ def home(request):
 
 @csrf_exempt
 def find_keywords(request):
+    """Totally ignores the request since we're not focusing on this function.
+    => Sends a dummy stuff"""
     text = request.POST.get('text')
-    #kw = t.find_keywords(text) # TODO update? function to call
-    kw = ["dummy1", "dummy2", text]
+    kw = el.find_keywords(text)
     context = {"keywords": kw}
     return HttpResponse(json.dumps(context), content_type="application/json")
 
