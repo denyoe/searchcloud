@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-import cloudsearchbe.tools.parser as p
+import cloudsearchbe.tools.parser2 as p
 import cloudsearchbe.tools.elementary as el
 
 
@@ -32,6 +32,20 @@ def get_search_fetch(request):
                "links": ln_info
     }
     return HttpResponse(json.dumps(context), content_type="application/json")
+
+
+
+# @csrf_exempt
+# def get_search_fetch(request):
+#     kws = json.loads(request.POST.get('keywords')) # a list of keywords
+#     #query = " ".join(kw for kw in kws) # a string of keywords
+#     # ln_info = p.get_search_fetch(kws) # a list of jsons
+#     # context = {"content": kws,
+#     #            "links": ln_info
+#     # }
+#     context = p.get_search_fetch(kws)
+#     return HttpResponse(context, content_type="application/json")
+#     # return HttpResponse(json.dumps(context), content_type="application/json")
 
 
 @csrf_exempt
