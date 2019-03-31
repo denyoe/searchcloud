@@ -48,18 +48,35 @@ const URL_KWD = 'http://127.0.0.1:8000/api/keywords'
 // }
 
 const mapLinks = (links, key) => {
-    return (
-        <div key={key}>
-            <h4>{key}</h4>
-            <ul>
-                {
-                    links.map(item => {
-                        return <li key={item.rank}><a target="_" href={item.link}>{item.title}</a></li>
-                    })
-                }
-            </ul>
-        </div>
-    )
+    switch (key) {
+        case 'IMAGE':
+            return (
+                <div key={key}>
+                    <h4>{ key }</h4>
+                    {/* <h4>IMAGES</h4> */}
+                    <ul>
+                        {
+                            links.map(item => {
+                                return <li className="borderless" key={item.rank}><a href="#"><img alt={item.title} src={item.link} /></a></li>
+                            })
+                        }
+                    </ul>
+                </div>
+            )
+        default: 
+            return (
+                <div key={key}>
+                    <h4>{key}</h4>
+                    <ul>
+                        {
+                            links.map(item => {
+                                return <li key={item.rank}><a target="_" href={item.link}>{item.title}</a></li>
+                            })
+                        }
+                    </ul>
+                </div>
+            )
+    }
 }
 
 // const printOrigin = (str) => {

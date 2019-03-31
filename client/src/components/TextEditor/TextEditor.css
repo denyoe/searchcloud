@@ -58,6 +58,21 @@
     padding: .5em;
 }
 
+.c-item ul li.borderless {
+    border: none;
+    display: inline-flex;
+}
+
+.c-item ul li img{
+    float: left;
+    margin: 5px;
+    border: 5px solid #333;
+    -moz-transition: all 0.2s ease-in-out;
+    -webkit-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
+    width: 40%;
+}
+
 .c-item ul li:hover {
     background-color: lightblue;
 }
