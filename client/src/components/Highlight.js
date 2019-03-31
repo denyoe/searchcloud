@@ -13,13 +13,28 @@ class Highlight extends Component {
         }
     }
 
-    componentDidMount() {
-        const { content, links } = this.props.mark.toJSON().data.keyword
+    // componentDidUpdate() {
 
-        this.setState({
-            content: content,
-            links: links
-        })
+    // }
+
+    componentDidMount() {
+        // const { content, links } = this.props.mark.toJSON().data.keyword
+        // console.log(this.props.keyword)
+
+        const query = this.props.children.props.children
+        
+        // console.log(query)
+
+        this.props.fetchLinks(query)
+
+        // if( this.props.keyword ) {
+        //     const { content, links } = this.props.keyword
+
+        //     this.setState({
+        //         content: content,
+        //         links: links
+        //     })
+        // }
     }
 
     onMouseEnter = (e) => {
@@ -36,6 +51,19 @@ class Highlight extends Component {
 
     onClick = (e) => {
         e.preventDefault()
+
+        // this.fetchLinks()
+        // console.log(e.target.textContent)
+        this.props.fetchLinks(e.target.textContent)
+
+        // if (this.props.keyword) {
+        //     const { content, links } = this.props.keyword
+
+        //     this.setState({
+        //         content: content,
+        //         links: links
+        //     })
+        // }
 
         this.props.setResults(this.state.links)
     }

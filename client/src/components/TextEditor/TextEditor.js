@@ -3,7 +3,7 @@ import './TextEditor.css';
 import { Editor } from 'slate-react';
 import { Value, Data } from 'slate';
 import Highlight from '../Highlight';
-import { TXT } from './sample.js';
+import { TXT, TXT2 } from './sample.js';
 import axios from 'axios';
 
 const initialValue = Value.fromJSON({
@@ -17,7 +17,7 @@ const initialValue = Value.fromJSON({
                         object: 'text',
                         leaves: [
                             {
-                                text: TXT
+                                text: TXT2
                             }
                         ]
                     }
@@ -28,7 +28,7 @@ const initialValue = Value.fromJSON({
 })
 
 const styles = {
-    'width': '100%'
+    'width': '50%'
 }
 
 const URL = 'http://127.0.0.1:8000/api/search_fetch'
@@ -80,21 +80,21 @@ const mapOrigins = (origins) => {
 }
 
 const Results = (props) => {
-    const { links } = props
+    const { links, isEmpty, isLoading } = props
 
-    if( links.length ) {
+    if ( isLoading ) {
+        return (
+            <div className="c-inital">
+                Loading...
+            </div>
+        )
+    }
+
+    if( !isEmpty && links.length ) {
         const transformedLinks = []
 
-        // {
-        //     "title": "Apple (Latin America)",
-        //         "link": "https://www.apple.com/lae/",
-        //             "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
-        //                 "origin": "GOOGLE",
-        //                     "rank": 1
-        // }
-
         links.map(item => {
-            if (item.origin in transformedLinks ) {
+            if (item.origin in transformedLinks) {
                 transformedLinks[item.origin].push({
                     link: item.link,
                     rank: item.rank,
@@ -111,45 +111,28 @@ const Results = (props) => {
             }
         })
 
-        // console.log(transformedLinks)
-
-        // transformedLinks.map(item => {
-        //     console.log(item)
-        // })
-        // for (let origin in transformedLinks) {
-        //     console.log(transformedLinks[origin])
-        // }
-
         return (
             <div className="c-item">
                 {
                     mapOrigins(transformedLinks)
                 }
-
-                    {/* let markup = `<h4>Google</h4><ul>`
-                        item.map(link => {
-                            markup += `<li key={link.rank}><a target="_" href={link.link}>{link.title}</a></li>`
-                        })
-                        markup += `</ul>`
-
-                        console.log('markup')
-                        return markup */}
-                {/* } */}
-                
-                {/* <ul>
-                    {transformedLinks.map(item => {
-                        return <li key={item.rank}><a target="_" href={item.link}>{item.title}</a></li>
-                    }) }
-                </ul> */}
             </div>
         )
-    } else {
+    }
+    
+    if ( !links.length && !isEmpty ) {
         return (
             <div className="c-inital">
                 Select a Section and Press <em>Ctrl+H</em> to analysis
             </div>
         )
     }
+
+    return (
+        <div className="c-inital">
+            Empty Set
+            </div>
+    )
     
 }
 
@@ -164,41 +147,41 @@ const Results = (props) => {
 //     </div>
 // `
 
-const results = {
-    keywords: [
-        {
-            content: 'summer\'s lease hath',
-            links: [
-                {
-                    "title": "Apple (Latin America)",
-                    "link": "https://www.apple.com/lae/",
-                    "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
-                    "origin": "GOOGLE",
-                    "rank": 1
-                }
-            ]
-        },
-        {
-            content: 'this gives life to thee.',
-            links: [
-                {
-                    "title": "Apple (Latin America)",
-                    "link": "https://www.shmoop.com/sonnet-18/section-2-lines-9-14-summary.html",
-                    "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
-                    "origin": "GOOGLE",
-                    "rank": 1
-                },
-                {
-                    "title": "Brainly",
-                    "link": "https://brainly.com/question/3697676",
-                    "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
-                    "origin": "GOOGLE",
-                    "rank": 2
-                }
-            ]
-        }
-    ]
-}
+// const results = {
+//     keywords: [
+//         {
+//             content: 'summer\'s lease hath',
+//             links: [
+//                 {
+//                     "title": "Apple (Latin America)",
+//                     "link": "https://www.apple.com/lae/",
+//                     "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
+//                     "origin": "GOOGLE",
+//                     "rank": 1
+//                 }
+//             ]
+//         },
+//         {
+//             content: 'this gives life to thee.',
+//             links: [
+//                 {
+//                     "title": "Apple (Latin America)",
+//                     "link": "https://www.shmoop.com/sonnet-18/section-2-lines-9-14-summary.html",
+//                     "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
+//                     "origin": "GOOGLE",
+//                     "rank": 1
+//                 },
+//                 {
+//                     "title": "Brainly",
+//                     "link": "https://brainly.com/question/3697676",
+//                     "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
+//                     "origin": "GOOGLE",
+//                     "rank": 2
+//                 }
+//             ]
+//         }
+//     ]
+// }
 
 export default class TextEditor extends Component {
 
@@ -226,7 +209,7 @@ export default class TextEditor extends Component {
             case 'strikethrough':
                 return <strike {...{ attributes }}>{children}</strike>
             case 'highlight':
-                return <Highlight {...props} color="yellow" setResults={this.setResults} />
+                return <Highlight {...props} fetchLinks={this.fetchLinks} keyword={this.links} color="yellow" setResults={this.setResults} />
             default:
                 return next()
         }
@@ -257,12 +240,14 @@ export default class TextEditor extends Component {
 
         this.state = {
             value: initialValue,
+            isLoading: false,
+            isEmpty: false,
             links: []
         }
     }
 
     componentDidMount() {
-        this.mapKeywords(results.keywords)
+        // this.mapKeywords(results.keywords)
     }
 
     mapKeywords = (keywords) => {
@@ -274,10 +259,12 @@ export default class TextEditor extends Component {
     highlight(keyword, color = 'yellow') {
         const { editor } = this
         const { content } = keyword
-        this.fetchLinks(content)
+        // this.fetchLinks(content)
         const { value } = editor
         const texts = value.document.getTexts()
         // const decorations = []
+
+        // console.log('keyword', keyword)
 
         texts.forEach(node => {
             const { key, text } = node
@@ -304,6 +291,13 @@ export default class TextEditor extends Component {
         })
     }
 
+    toggleLoading = () => {
+        console.log('toggle loading...')
+        this.setState({
+            isLoading: !this.state.isLoading
+        })
+    }
+
     fetchLinks = (keyword) => {
         // axios.post(URL, {
         //     'keywords': [keyword]
@@ -313,6 +307,40 @@ export default class TextEditor extends Component {
         //     })
         //     console.log(data)
         // })
+
+        let formData = new FormData()
+        formData.set('keywords', JSON.stringify(keyword))
+
+        console.log('fetching...')
+        this.toggleLoading()
+
+        axios({
+            method: 'POST',
+            url: URL,
+            data: formData,
+            config: { headers: { 'Content-Type': 'multipart/form-data' } }
+        })
+        .then(({ data }) => {
+            //handle success
+            console.log(data.links)
+            this.toggleLoading()
+            if(! data.links.length ) {
+                this.setState({
+                    'isEmpty': true
+                })
+            } else {
+                this.setState({
+                    'isEmpty': false
+                })
+            }
+            this.setState({
+                links: data.links
+            })
+        })
+        .catch((err) => {
+            //handle error
+            console.log(err.message)
+        })
     }
 
     setResults = (links) => {
@@ -365,7 +393,7 @@ export default class TextEditor extends Component {
                 </div>
                 <div className="c-results">
                     {/* <i class="fas fa-igloo"></i> */}
-                    <Results links={this.state.links} />
+                    <Results isLoading={this.state.isLoading} isEmpty={this.state.isEmpty} links={this.state.links} />
                 </div>
             </div>
         )
