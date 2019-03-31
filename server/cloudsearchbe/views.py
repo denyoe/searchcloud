@@ -23,29 +23,24 @@ def find_keywords(request):
     return HttpResponse(json.dumps(context), content_type="application/json")
 
 
-@csrf_exempt
-def get_search_fetch(request):
-    kws = json.loads(request.POST.get('keywords')) # a list of keywords
-    #query = " ".join(kw for kw in kws) # a string of keywords
-    ln_info = p.get_search_fetch(kws) # a list of jsons
-    context = {"content": kws,
-               "links": ln_info
-    }
-    return HttpResponse(json.dumps(context), content_type="application/json")
-
-
-
 # @csrf_exempt
 # def get_search_fetch(request):
 #     kws = json.loads(request.POST.get('keywords')) # a list of keywords
 #     #query = " ".join(kw for kw in kws) # a string of keywords
-#     # ln_info = p.get_search_fetch(kws) # a list of jsons
-#     # context = {"content": kws,
-#     #            "links": ln_info
-#     # }
-#     context = p.get_search_fetch(kws)
-#     return HttpResponse(context, content_type="application/json")
-#     # return HttpResponse(json.dumps(context), content_type="application/json")
+#     ln_info = p.get_search_fetch(kws) # a list of jsons
+#     context = {"content": kws,
+#                "links": ln_info
+#     }
+#     return HttpResponse(json.dumps(context), content_type="application/json")
+#
+#
+#
+@csrf_exempt
+def get_search_fetch(request):
+    kws = json.loads(request.POST.get('keywords')) # a list of keywords
+
+    context = p.get_search_fetch(kws)
+    return HttpResponse(context, content_type="application/json")
 
 
 @csrf_exempt
