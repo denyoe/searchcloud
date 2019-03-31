@@ -5,7 +5,6 @@
     align-items: center;
 }
 
-
 .c-text {
     flex-grow: 1;
     line-height: 2em;
@@ -22,8 +21,9 @@
     height: 100vh;
     line-height: 1em;
     position: fixed;
-    top: 10vh;
+    top: 5vh;
     right: 0;
+    overflow: auto;
 }
 
 .c-results:after {
@@ -53,6 +53,18 @@
 
 .c-item ul li {
     text-decoration: none;
+    border-bottom: 1px solid #dedede;
+    margin-bottom: 1em;
+    padding: .5em;
+}
+
+.c-item ul li:hover {
+    background-color: lightblue;
+}
+
+.c-item ul li a {
+    color: inherit;
+    text-decoration: none;
 }
 
 .c-inital {
@@ -61,4 +73,8 @@
     font-size: .95em;
     align-items: center;
     margin-top: 40vh;
+}
+
+h4 {
+    color: red
 }

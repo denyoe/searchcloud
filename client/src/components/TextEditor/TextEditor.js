@@ -85,14 +85,14 @@ const Results = (props) => {
 
     if ( isLoading ) {
         const loaderStyle = {
-            "font-size": "5em",
+            "fontSize": "5em",
             "margin": "0 170%"
         }
 
         return (
             <div className="c-inital">
                 {/* Loading... */}
-                <i class="fas fa-circle-notch fa-spin" style={loaderStyle}></i>
+                <i className="fas fa-circle-notch fa-spin" style={loaderStyle}></i>
             </div>
         )
     }
@@ -258,7 +258,6 @@ export default class TextEditor extends Component {
             config: { headers: { 'Content-Type': 'multipart/form-data' } }
         })
         .then(({ data }) => {
-            //handle success
             console.log(data.links)
             this.toggleLoading()
             if (!data.links.length) {
@@ -274,10 +273,7 @@ export default class TextEditor extends Component {
                 links: data.links
             })
         })
-        .catch((err) => {
-            //handle error
-            console.log(err.message)
-        })
+        .catch(err => console.log(err.message))
     }
 
     mapKeywords = (keywords) => {
@@ -351,10 +347,11 @@ export default class TextEditor extends Component {
             config: { headers: { 'Content-Type': 'multipart/form-data' } }
         })
         .then(({ data }) => {
-            //handle success
-            console.log(data.links)
+            const _links = JSON.parse(data.links)
+
             this.toggleLoading()
-            if(! data.links.length ) {
+
+            if (! _links.length ) {
                 this.setState({
                     'isEmpty': true
                 })
@@ -364,13 +361,10 @@ export default class TextEditor extends Component {
                 })
             }
             this.setState({
-                links: data.links
+                links: _links
             })
         })
-        .catch((err) => {
-            //handle error
-            console.log(err.message)
-        })
+        .catch(err => console.log(err.message))
     }
 
     setResults = (links) => {

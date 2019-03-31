@@ -47,7 +47,7 @@ class Highlight extends Component {
         const query = this.props.children.props.children
         this.props.fetchLinks(query)
 
-        this.props.setResults(this.state.links)
+        // this.props.setResults(this.state.links)
     }
  
     render() {
