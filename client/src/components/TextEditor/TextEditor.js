@@ -333,9 +333,10 @@ export default class TextEditor extends Component {
         //     })
         //     console.log(data)
         // })
+        // console.log('keyword', JSON.stringify([keyword]))
 
         let formData = new FormData()
-        formData.set('keywords', JSON.stringify(keyword))
+        formData.set('keywords', JSON.stringify([keyword]))
 
         console.log('fetching...')
         this.toggleLoading()
@@ -347,7 +348,10 @@ export default class TextEditor extends Component {
             config: { headers: { 'Content-Type': 'multipart/form-data' } }
         })
         .then(({ data }) => {
-            const _links = JSON.parse(data.links)
+            // const _links = JSON.parse(data.links)
+            const _links = data.links
+
+            console.log(_links)
 
             this.toggleLoading()
 
