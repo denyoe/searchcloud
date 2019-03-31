@@ -224,7 +224,7 @@ def se_to_json(se, query):
     query = query.replace(' ', '+') # there may be composed words, eg 'Persona 4'
     nb_results = 5  # But don't know why we have >5 results for Youtube searched?!
     #print("se_url_stems[se]:", se_url_stems[se])
-    response = requests.get(se_url_stems[se].format(query,nb_results))
+    response = requests.get(se_url_stems[se].format(query, nb_results))
     response.raise_for_status()
     html = response.text
     parsed = se_parse_results(se, html)
@@ -256,7 +256,7 @@ def get_search_fetch(keywords):
         el_result += se_to_json("google", el["keyword"])
         el_result += se_to_json("google_maps", el["keyword"])
         el_result += se_to_json("google_scholar", el["keyword"])
-        el_result += se_to_json("youtube", el["keyword"])
+        #el_result += se_to_json("youtube", el["keyword"]) # link doesn't work, nor nb requests
         result.append({"keyword": el["keyword"], "links": el_result})
     return result
 
