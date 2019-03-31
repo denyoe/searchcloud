@@ -32,6 +32,7 @@ const styles = {
 }
 
 const URL = 'http://127.0.0.1:8000/api/search_fetch'
+const URL_KWD = 'http://127.0.0.1:8000/api/keywords'
 
 // const initialResults = () => {
 //     return (
@@ -83,9 +84,15 @@ const Results = (props) => {
     const { links, isEmpty, isLoading } = props
 
     if ( isLoading ) {
+        const loaderStyle = {
+            "font-size": "5em",
+            "margin": "0 170%"
+        }
+
         return (
             <div className="c-inital">
-                Loading...
+                {/* Loading... */}
+                <i class="fas fa-circle-notch fa-spin" style={loaderStyle}></i>
             </div>
         )
     }
@@ -130,22 +137,11 @@ const Results = (props) => {
 
     return (
         <div className="c-inital">
-            Empty Set
-            </div>
+            Your Query Returned No Results.
+        </div>
     )
     
 }
-
-// const initialResults = `
-//     <div className="c-inital">
-//         <h4>Google</h4>
-//         <ul>
-//             <li><a href="">link</a></li>
-//             <li><a href="">link</a></li>
-//             <li><a href="">link</a></li>
-//         </ul>
-//     </div>
-// `
 
 // const results = {
 //     keywords: [
@@ -250,6 +246,40 @@ export default class TextEditor extends Component {
         // this.mapKeywords(results.keywords)
     }
 
+    fetchKeywords(txt) {
+
+        let formData = new FormData()
+        formData.set('content', txt)
+
+        axios({
+            method: 'POST',
+            url: URL_KWD,
+            data: formData,
+            config: { headers: { 'Content-Type': 'multipart/form-data' } }
+        })
+        .then(({ data }) => {
+            //handle success
+            console.log(data.links)
+            this.toggleLoading()
+            if (!data.links.length) {
+                this.setState({
+                    'isEmpty': true
+                })
+            } else {
+                this.setState({
+                    'isEmpty': false
+                })
+            }
+            this.setState({
+                links: data.links
+            })
+        })
+        .catch((err) => {
+            //handle error
+            console.log(err.message)
+        })
+    }
+
     mapKeywords = (keywords) => {
         keywords.map(keyword => {
             this.highlight(keyword)
@@ -352,7 +382,6 @@ export default class TextEditor extends Component {
     }
 
     onKeyDown = (e, editor, next) => {
-        // cancel actions not starting with Ctrl key press
         if(! e.ctrlKey )    return next()
         e.preventDefault()
 
@@ -392,7 +421,6 @@ export default class TextEditor extends Component {
                     />
                 </div>
                 <div className="c-results">
-                    {/* <i class="fas fa-igloo"></i> */}
                     <Results isLoading={this.state.isLoading} isEmpty={this.state.isEmpty} links={this.state.links} />
                 </div>
             </div>
