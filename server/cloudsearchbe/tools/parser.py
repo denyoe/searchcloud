@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from collections import namedtuple
 import json
+import itertools
 
 USER_AGENT = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'}
@@ -152,51 +153,64 @@ se_url_stems = {
     "google": 'https://www.google.com/search?q={}&num={}&hl=en',
     "youtube": 'https://www.youtube.com/results?search_query={}',
     "google_scholar": 'https://scholar.google.com/scholar?q={}&num={}&hl=en',
-    "google_images": 'https://www.google.com/search?',
+    "google_images": 'https://www.google.com/search?tbm=isch&source=lnms&q={}',
     "google_maps": "https://www.google.fr/maps/dir//"
 }
 
 
 def se_parse_results(se, html):
-    """1/ Specificities"""
-    soup_class = ''
-    result_class = ''
-    origin = ''
-    span_or_div = 'div'
-    if se == "google_scholar":
-        soup_class = 'gs_r gs_or gs_scl'
-        result_class = "gs_rs"
-        origin = 'SCHOLAR'
-    elif se == "google":
-        soup_class = 'g'
-        result_class = "st"
-        origin = 'GOOGLE'
-        span_or_div = 'span'
-    elif se == "youtube":
-        soup_class = 'yt-lockup yt-lockup-tile yt-lockup-video vve-check clearfix'
-        result_class = "yt-lockup-description yt-ui-ellipsis yt-ui-ellipsis-2"
-        origin = 'YOUTUBE'
-    else:  # TODO correct that
-        soup_class = 'g'
-        result_class = "st"
-        origin = 'GOOGLE'
-    print('soup_class:', soup_class)
-    """2/ Generalities"""
-    soup = BeautifulSoup(html, 'html.parser')
     result_list = []
     result_index = 1
-    result_html_set = soup.find_all('div', attrs={'class': soup_class})
-    for result_html in result_html_set:
-        link = result_html.find('a', href=True)
-        title = result_html.find('h3')
-        description = result_html.find(span_or_div, attrs={'class': result_class})
-        if link and title and description:
-            link = link['href']
-            title = title.get_text()
-            description = description.get_text()
-            result_list.append(
-                SearchResult(link=link, title=title, desc=description, rank=result_index, origin=origin))
+
+    """Big specificity: google images"""
+    if se == "google_images":
+        number_results = 5
+        soup = BeautifulSoup(html, 'html.parser')
+        result_html_set = soup.find_all('div', attrs={'class': 'rg_meta'})
+        metadata_dicts = (json.loads(e.text) for e in result_html_set)
+        link_type_records = ((d["ou"], d["ity"]) for d in metadata_dicts)
+        images = itertools.islice(link_type_records, number_results)
+        for i, (url, image_type) in enumerate(images):
+            result_list.append(SearchResult(link=url, title='', desc='', rank=result_index, origin='IMAGE'))
             result_index += 1
+    else:
+        """1/ Specificities"""
+        soup_class = ''
+        result_class = ''
+        origin = ''
+        span_or_div = 'div'
+        if se == "google_scholar":
+            soup_class = 'gs_r gs_or gs_scl'
+            result_class = "gs_rs"
+            origin = 'SCHOLAR'
+        elif se == "google":
+            soup_class = 'g'
+            result_class = "st"
+            origin = 'GOOGLE'
+            span_or_div = 'span'
+        elif se == "youtube":
+            soup_class = 'yt-lockup yt-lockup-tile yt-lockup-video vve-check clearfix'
+            result_class = "yt-lockup-description yt-ui-ellipsis yt-ui-ellipsis-2"
+            origin = 'YOUTUBE'
+        else:  # But no time for google_maps and so
+            soup_class = 'g'
+            result_class = "st"
+            origin = 'GOOGLE'
+        print('soup_class:', soup_class)
+        """2/ Generalities"""
+        soup = BeautifulSoup(html, 'html.parser')
+        result_html_set = soup.find_all('div', attrs={'class': soup_class})
+        for result_html in result_html_set:
+            link = result_html.find('a', href=True)
+            title = result_html.find('h3')
+            description = result_html.find(span_or_div, attrs={'class': result_class})
+            if link and title and description:
+                link = link['href']
+                title = title.get_text()
+                description = description.get_text()
+                result_list.append(
+                    SearchResult(link=link, title=title, desc=description, rank=result_index, origin=origin))
+                result_index += 1
     return result_list
 
 
@@ -208,9 +222,9 @@ def se_to_json(se, query):
     """
     print("query:", query)
     query = query.replace(' ', '+') # there may be composed words, eg 'Persona 4'
-    nb_results = 5
-    print("se_url_stems[se]:", se_url_stems[se])
-    response = requests.get(se_url_stems[se].format(query,nb_results))
+    nb_results = 5  # But don't know why we have >5 results for Youtube searched?!
+    #print("se_url_stems[se]:", se_url_stems[se])
+    response = requests.get(se_url_stems[se].format(query, nb_results))
     response.raise_for_status()
     html = response.text
     parsed = se_parse_results(se, html)
@@ -231,6 +245,22 @@ def keep_wiki_links(el_result_google):
     return el_result_wiki
 
 
+def get_search_fetch(keywords):
+    """
+    :param keywords: a list of keywords.
+    :return:
+    """
+    result = []
+    for el in keywords:
+        el_result = se_to_json("google_images", el["keyword"])
+        el_result += se_to_json("google", el["keyword"])
+        el_result += se_to_json("google_maps", el["keyword"])
+        el_result += se_to_json("google_scholar", el["keyword"])
+        #el_result += se_to_json("youtube", el["keyword"]) # link doesn't work, nor nb requests
+        result.append({"keyword": el["keyword"], "links": el_result})
+    return result
+
+
 def get_search_fetch_by_types(keywords_with_type):
     """
     :param keywords_with_type: a list of jsons. One json = {'keyword': 'kw1', 'type': 'person'}
@@ -249,14 +279,10 @@ def get_search_fetch_by_types(keywords_with_type):
             el_result += keep_wiki_links(el_result_google)
         else:
             el_result = se_to_json("google", el["keyword"])
-            el_result += se_to_json("google", el["google_scholar"])
+            el_result += se_to_json("google_scholar", el["keyword"])
             se_to_json("google_images", el["keyword"])
         result.append({"keyword": el["keyword"], "links":el_result})
     return result
-
-
-
-
 
 
 if __name__ == '__main__':
@@ -278,39 +304,4 @@ if __name__ == '__main__':
         print('-------')
 		
 
-# New PART IMAGES
 
-def image_to_json(query):
-    return export_results(image_search(query))
-
-
-def image_search(query):
-    html = image_fetch_results(query)
-    return image_parse_results(html, 5)
-
-
-def image_fetch_results(query):
-    query = query.replace(' ', '+')
-    url = 'https://www.google.com/search?tbm=isch&source=lnms&q={}'.format(query)
-    response = requests.get(url, headers=USER_AGENT)
-    response.raise_for_status()
-
-    return response.text
-
-
-def image_parse_results(html, number_results):
-    soup = BeautifulSoup(html, 'html.parser')
-
-    result_list = []
-    result_index = 1
-    result_html_set = soup.find_all('div', attrs={'class': 'rg_meta'})
-
-    metadata_dicts = (json.loads(e.text) for e in result_html_set)
-    link_type_records = ((d["ou"], d["ity"]) for d in metadata_dicts)
-    images = itertools.islice(link_type_records, number_results)
-    for i, (url, image_type) in enumerate(images):
-        result_list.append(SearchResult(link=url, title='', desc='', rank=result_index, origin='IMAGE'))
-        result_index += 1
-
-    return result_list
-# New PART IMAGES
