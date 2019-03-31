@@ -1,6 +1,4 @@
 import React, { Component } from 'react'
-// import Popup from './Popup/Popup'
-// import ReactTooltip from 'react-tooltip'
 
 class Highlight extends Component {
     constructor(props) {
@@ -13,18 +11,11 @@ class Highlight extends Component {
         }
     }
 
-    // componentDidUpdate() {
-
-    // }
-
     componentDidMount() {
         // const { content, links } = this.props.mark.toJSON().data.keyword
         // console.log(this.props.keyword)
 
         const query = this.props.children.props.children
-        
-        // console.log(query)
-
         this.props.fetchLinks(query)
 
         // if( this.props.keyword ) {
@@ -40,30 +31,21 @@ class Highlight extends Component {
     onMouseEnter = (e) => {
         e.preventDefault()
 
-        this.setState({ showTooltip: true })
+        // this.setState({ showTooltip: true })
     }
 
     onMouseLeave = (e) => {
         e.preventDefault()
 
-        this.setState({ showTooltip: false })
+        // this.setState({ showTooltip: false })
     }
 
     onClick = (e) => {
         e.preventDefault()
 
-        // this.fetchLinks()
         // console.log(e.target.textContent)
-        this.props.fetchLinks(e.target.textContent)
-
-        // if (this.props.keyword) {
-        //     const { content, links } = this.props.keyword
-
-        //     this.setState({
-        //         content: content,
-        //         links: links
-        //     })
-        // }
+        const query = this.props.children.props.children
+        this.props.fetchLinks(query)
 
         this.props.setResults(this.state.links)
     }
@@ -78,34 +60,9 @@ class Highlight extends Component {
             'cursor': 'pointer'
         }
 
-        // return <span onMouseEnter={this.onHover} style={style} {...{ attributes }}>{children}</span>
-
-        // console.log(this.showTooltip)
-        // if( this.state.showTooltip ) {
-        //     console.log('displaying tooltip')
-        //     return (
-        //         <div>
-        //             <Popup />
-        //             {/* <ReactTooltip id='sadFace' type='warning' effect='solid'>
-        //             <span>Show sad face</span>
-        //         </ReactTooltip> */}
-
-        //             <span onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave} style={style} {...{ attributes }}>{children}</span>
-        //         </div>
-        //     )
-        // } else {
-        //     return <span onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave} style={style} {...{ attributes }}>{children}</span>
-        // }
-
         return (
             <span onClick={this.onClick} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave} style={style} {...{ attributes }}>{children}</span>
         )
-
-        // return (
-        //     <Popup trigger={<button> Trigger</button>} position="top center">
-        //         <div>Popup content here !!</div>
-        //     </Popup>
-        // )
     }
 }
 
