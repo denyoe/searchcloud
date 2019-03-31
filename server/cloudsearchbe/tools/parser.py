@@ -222,7 +222,7 @@ def se_to_json(se, query):
     """
     print("query:", query)
     query = query.replace(' ', '+') # there may be composed words, eg 'Persona 4'
-    nb_results = 5
+    nb_results = 5  # But don't know why we have >5 results for Youtube searched?!
     #print("se_url_stems[se]:", se_url_stems[se])
     response = requests.get(se_url_stems[se].format(query,nb_results))
     response.raise_for_status()
@@ -256,6 +256,7 @@ def get_search_fetch(keywords):
         el_result += se_to_json("google", el["keyword"])
         el_result += se_to_json("google_maps", el["keyword"])
         el_result += se_to_json("google_scholar", el["keyword"])
+        el_result += se_to_json("youtube", el["keyword"])
         result.append({"keyword": el["keyword"], "links": el_result})
     return result
 
@@ -284,10 +285,6 @@ def get_search_fetch_by_types(keywords_with_type):
     return result
 
 
-
-
-
-
 if __name__ == '__main__':
     google_results = google_search('denis trystram publication google scholar')
     for result in google_results:
@@ -307,23 +304,4 @@ if __name__ == '__main__':
         print('-------')
 		
 
-# New PART IMAGES
 
-
-
-def image_parse_results(html, number_results):
-    soup = BeautifulSoup(html, 'html.parser')
-
-    result_list = []
-    result_index = 1
-    result_html_set = soup.find_all('div', attrs={'class': 'rg_meta'})
-
-    metadata_dicts = (json.loads(e.text) for e in result_html_set)
-    link_type_records = ((d["ou"], d["ity"]) for d in metadata_dicts)
-    images = itertools.islice(link_type_records, number_results)
-    for i, (url, image_type) in enumerate(images):
-        result_list.append(SearchResult(link=url, title='', desc='', rank=result_index, origin='IMAGE'))
-        result_index += 1
-
-    return result_list
-# New PART IMAGES
