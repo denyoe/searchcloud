@@ -43,8 +43,8 @@ def google_parse_results(html):
         description = result_html.find('span', attrs={'class': 'st'})
         if link and title and description:
             link = link['href']
-            title = title.get_text()
-            description = description.get_text()
+            title = title.get_text()  # .replace(']', ' ').replace('[', ' ')
+            description = description.get_text()  # .replace(']', ' ').replace('[', ' ')
             result_list.append(
                 SearchResult(link=link, title=title, desc=description, rank=result_index, origin='GOOGLE'))
             result_index += 1
@@ -81,8 +81,8 @@ def scholar_parse_results(html):
         description = result_html.find('div', attrs={'class': 'gs_rs'})
         if link and title and description:
             link = link['href']
-            title = title.get_text()
-            description = description.get_text()
+            title = title.get_text()  # .replace(']', ' ').replace('[', ' ')
+            description = description.get_text()  # .replace(']', ' ').replace('[', ' ')
             result_list.append(
                 SearchResult(link=link, title=title, desc=description, rank=result_index, origin='SCHOLAR'))
             result_index += 1
@@ -122,8 +122,8 @@ def youtube_parse_results(html, number_results):
         description = result_html.find('div', attrs={'class': 'yt-lockup-description yt-ui-ellipsis yt-ui-ellipsis-2'})
         if link and title and description:
             link = 'https://www.youtube.com' + link['href']
-            title = title.get_text()
-            description = description.get_text()
+            title = title.get_text()  # .replace(']', ' ').replace('[', ' ')
+            description = description.get_text()  # .replace(']', ' ').replace('[', ' ')
             result_list.append(
                 SearchResult(link=link, title=title, desc=description, rank=result_index, origin='YOUTUBE'))
             result_index += 1
@@ -185,26 +185,42 @@ def export_results(results):
     return ans
 
 
-def get_search_fetch(keywords):
-    keywords = keywords[0]
-    ans = '['
-
-    google_results = google_search(keywords)
-    for result in google_results:
-        ans += json.dumps(result._asdict()) + ', '
-
-    scholar_results = scholar_search(keywords)
-    for result in scholar_results:
-        ans += json.dumps(result._asdict()) + ', '
-
-    youtube_results = youtube_search(keywords)
-    for i, result in enumerate(youtube_results):
-        if i == 4:
-            ans += json.dumps(result._asdict())
-        else:
-            ans += json.dumps(result._asdict()) + ', '
-    ans += ']'
-    return ans
+# def get_search_fetch(keywords):
+#     keywords = keywords[0]
+#     ans = '['
+#
+#     # google_results = google_search(keywords)
+#     # for result in google_results:
+#     #     ans += json.dumps(result._asdict()) + ', '
+#     #
+#     # scholar_results = scholar_search(keywords)
+#     # for result in scholar_results:
+#     #     ans += json.dumps(result._asdict()) + ', '
+#     #
+#     # youtube_results = youtube_search(keywords)
+#     # for i, result in enumerate(youtube_results):
+#     #     if i == 4:
+#     #         ans += json.dumps(result._asdict())
+#     #     else:
+#     #         ans += json.dumps(result._asdict()) + ', '
+#     #
+#     results = []
+#     google_results = google_search(keywords)
+#     # for result in google_results:
+#     #     results += result._asdict()
+#
+#     scholar_results = scholar_search(keywords)
+#     # for result in scholar_results:
+#     #     results += result._asdict()
+#
+#     youtube_results = youtube_search(keywords)
+#     # for result in youtube_results:
+#     #     results += result._asdict()
+#
+#     results = google_results + scholar_results + youtube_results
+#
+#     ans += ']'
+#     return json.dumps(results)
 
 # def get_search_fetch(keywords):
 #     """
@@ -222,24 +238,20 @@ def get_search_fetch(keywords):
 #     return result
 
 
+def get_search_fetch(keywords):
+    keywords = keywords[0]
+    google_results = google_search(keywords)
+    ans = '{"content":"' + str(keywords) + '", "links": [' + json.dumps(google_results[0]._asdict())
 
-# def get_search_fetch(keywords):
-#     keywords = keywords[0]
-#     ans = '{"content":"' + str(keywords) + '", "links": ['
-#
-#     google_results = google_search(keywords)
-#     for result in google_results:
-#         ans += json.dumps(result._asdict()) + ', '
-#
-#     scholar_results = scholar_search(keywords)
-#     for result in scholar_results:
-#         ans += json.dumps(result._asdict()) + ', '
-#
-#     youtube_results = youtube_search(keywords)
-#     for i, result in enumerate(youtube_results):
-#         if i == 4:
-#             ans += json.dumps(result._asdict())
-#         else:
-#             ans += json.dumps(result._asdict()) + ', '
-#     ans += ']}'
-#     return ans
+    for i in range(1, 4):#google_results:
+        ans += ', ' + json.dumps(google_results[i]._asdict())
+
+    scholar_results = scholar_search(keywords)
+    for result in scholar_results:
+        ans += ', ' + json.dumps(result._asdict())
+
+    youtube_results = youtube_search(keywords)
+    for i, result in enumerate(youtube_results):
+            ans += ', ' + json.dumps(result._asdict())
+    ans += ']}'
+    return ans
