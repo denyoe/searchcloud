@@ -4,6 +4,7 @@ import { Editor } from 'slate-react';
 import { Value, Data } from 'slate';
 import Highlight from '../Highlight';
 import { TXT } from './sample.js';
+import axios from 'axios';
 
 const initialValue = Value.fromJSON({
     document: {
@@ -26,6 +27,12 @@ const initialValue = Value.fromJSON({
     }
 })
 
+const styles = {
+    'width': '100%'
+}
+
+const URL = 'http://127.0.0.1:8000/api/search_fetch'
+
 // const initialResults = () => {
 //     return (
 //         <div className="c-inital">
@@ -39,18 +46,101 @@ const initialValue = Value.fromJSON({
 //     )
 // }
 
+const mapLinks = (links, key) => {
+    return (
+        <div key={key}>
+            <h4>{key}</h4>
+            <ul>
+                {
+                    links.map(item => {
+                        return <li key={item.rank}><a target="_" href={item.link}>{item.title}</a></li>
+                    })
+                }
+            </ul>
+        </div>
+    )
+}
+
+// const printOrigin = (str) => {
+//     return <h4>{str}</h4>
+// }
+
+const mapOrigins = (origins) => {
+    const origins_array = Object.keys(origins)
+
+    return (
+        <div>
+            {
+                origins_array.map(item => {
+                    return mapLinks(origins[item], item)
+                })
+            }
+        </div>
+    )
+}
+
 const Results = (props) => {
     const { links } = props
 
     if( links.length ) {
+        const transformedLinks = []
+
+        // {
+        //     "title": "Apple (Latin America)",
+        //         "link": "https://www.apple.com/lae/",
+        //             "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
+        //                 "origin": "GOOGLE",
+        //                     "rank": 1
+        // }
+
+        links.map(item => {
+            if (item.origin in transformedLinks ) {
+                transformedLinks[item.origin].push({
+                    link: item.link,
+                    rank: item.rank,
+                    title: item.title,
+                    desc: item.desc
+                })
+            } else {
+                transformedLinks[item.origin] = [{
+                    link: item.link,
+                    rank: item.rank,
+                    title: item.title,
+                    desc: item.desc
+                }]
+            }
+        })
+
+        // console.log(transformedLinks)
+
+        // transformedLinks.map(item => {
+        //     console.log(item)
+        // })
+        // for (let origin in transformedLinks) {
+        //     console.log(transformedLinks[origin])
+        // }
+
         return (
             <div className="c-item">
-                <h4>Google</h4>
-                <ul>
-                    { links.map(link => {
-                        return <li><a target="_" href={link}>click me</a></li>
+                {
+                    mapOrigins(transformedLinks)
+                }
+
+                    {/* let markup = `<h4>Google</h4><ul>`
+                        item.map(link => {
+                            markup += `<li key={link.rank}><a target="_" href={link.link}>{link.title}</a></li>`
+                        })
+                        markup += `</ul>`
+
+                        console.log('markup')
+                        return markup */}
+                {/* } */}
+                
+                {/* <ul>
+                    {transformedLinks.map(item => {
+                        return <li key={item.rank}><a target="_" href={item.link}>{item.title}</a></li>
                     }) }
-                </ul>
+                </ul> */}
             </div>
         )
     } else {
@@ -79,16 +169,32 @@ const results = {
         {
             content: 'summer\'s lease hath',
             links: [
-                'http://www.shakespeare-online.com/sonnets/18detail.html',
-                'https://www.answers.com/Q/What_is_the_original_word_of_ow\'st',
-                'https://www.sparknotes.com/nofear/shakespeare/sonnets/sonnet_18/'
+                {
+                    "title": "Apple (Latin America)",
+                    "link": "https://www.apple.com/lae/",
+                    "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
+                    "origin": "GOOGLE",
+                    "rank": 1
+                }
             ]
         },
         {
             content: 'this gives life to thee.',
             links: [
-                'https://www.shmoop.com/sonnet-18/section-2-lines-9-14-summary.html',
-                'https://brainly.com/question/3697676'
+                {
+                    "title": "Apple (Latin America)",
+                    "link": "https://www.shmoop.com/sonnet-18/section-2-lines-9-14-summary.html",
+                    "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
+                    "origin": "GOOGLE",
+                    "rank": 1
+                },
+                {
+                    "title": "Brainly",
+                    "link": "https://brainly.com/question/3697676",
+                    "desc": "Discover the innovative world of Apple and shop everything iPhone, iPad, ...",
+                    "origin": "GOOGLE",
+                    "rank": 2
+                }
             ]
         }
     ]
@@ -168,6 +274,7 @@ export default class TextEditor extends Component {
     highlight(keyword, color = 'yellow') {
         const { editor } = this
         const { content } = keyword
+        this.fetchLinks(content)
         const { value } = editor
         const texts = value.document.getTexts()
         // const decorations = []
@@ -195,6 +302,17 @@ export default class TextEditor extends Component {
         editor.withoutSaving(() => {
             editor.setDecorations(this.decorations)
         })
+    }
+
+    fetchLinks = (keyword) => {
+        // axios.post(URL, {
+        //     'keywords': [keyword]
+        // }).then(data => {
+        //     this.setState({
+        //         links: data.links
+        //     })
+        //     console.log(data)
+        // })
     }
 
     setResults = (links) => {
@@ -242,6 +360,7 @@ export default class TextEditor extends Component {
                         schema={this.schema}
                         onChange={this.onChange}
                         onKeyDown={this.onKeyDown}
+                        styles={styles}
                     />
                 </div>
                 <div className="c-results">

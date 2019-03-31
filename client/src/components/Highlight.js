@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import Popup from './Popup/Popup'
-import ReactTooltip from 'react-tooltip'
+// import Popup from './Popup/Popup'
+// import ReactTooltip from 'react-tooltip'
 
 class Highlight extends Component {
     constructor(props) {
