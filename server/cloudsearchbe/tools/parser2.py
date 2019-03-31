@@ -243,7 +243,7 @@ def get_search_fetch(keywords):
     google_results = google_search(keywords)
     ans = '{"content":"' + str(keywords) + '", "links": [' + json.dumps(google_results[0]._asdict())
 
-    for i in range(1, 4):#google_results:
+    for i in range(1, len(google_results)):#google_results:
         ans += ', ' + json.dumps(google_results[i]._asdict())
 
     scholar_results = scholar_search(keywords)
@@ -251,7 +251,12 @@ def get_search_fetch(keywords):
         ans += ', ' + json.dumps(result._asdict())
 
     youtube_results = youtube_search(keywords)
-    for i, result in enumerate(youtube_results):
-            ans += ', ' + json.dumps(result._asdict())
+    for result in youtube_results:
+        ans += ', ' + json.dumps(result._asdict())
+
+    images_results = image_search(keywords)
+    for result in images_results:
+        ans += ', ' + json.dumps(result._asdict())
+
     ans += ']}'
     return ans
