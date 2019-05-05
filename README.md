@@ -11,5 +11,5 @@ Use of Anaconda environment with Python version 3.6.5
 
 ### Server
 1. `cd server`
-2. Install Requirements: `pip install -r requirements.txt`
-3. Run Applicatopm: `python manage.py runserver`
+2. Install Requirements: `python3 -m pip install -r requirements.txt`
+3. Run Applicatopm: `python3 manage.py runserver`
