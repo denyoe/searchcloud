@@ -8,6 +8,7 @@ urlpatterns = [
 
     #url(r'^cloudsearchbe$', views.home, name='home'),
     url(r'^$', views.home, name='home'),
+    url(r'^api/', views.welcome, name='welcome'),
     url(r'^api/keywords', views.find_keywords, name='keywords'),
     url(r'^api/search_fetch', views.get_search_fetch, name='search_fetch'),
     # cannot call it search_fetch_by_types because Django will mingle with the previous one

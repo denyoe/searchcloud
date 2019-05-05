@@ -15,6 +15,9 @@ def home(request):
     return render(request, 'cloudsearchbe/first.html', context)
 
 
+def welcome(request):
+    return HttpResponse(json.dumps({'message':'Welcome to the Search Cloud API. Are you sure you should be here !?'}), content_type="application/json")
+
 @csrf_exempt
 def find_keywords(request):
     text = request.POST.get('text')
