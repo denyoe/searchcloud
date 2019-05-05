@@ -31,8 +31,8 @@ const styles = {
     'width': '50%'
 }
 
-const BASE_URL = 'http://127.0.0.1:8000/api'
-// const BASE_URL = 'https://searchcloud.bleek.io/api'
+// const BASE_URL = 'http://127.0.0.1:8000/api'
+const BASE_URL = 'https://searchcloud.bleek.io/apiapi'
 
 const URL = `${BASE_URL}/search_fetch`
 const URL_KWD = `${BASE_URL}/keywords`
