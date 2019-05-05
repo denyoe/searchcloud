@@ -3,7 +3,7 @@ import './TextEditor.css';
 import { Editor } from 'slate-react';
 import { Value, Data } from 'slate';
 import Highlight from '../Highlight';
-import { TXT, TXT2 } from './sample.js';
+import { TXT2 } from './sample.js';
 import axios from 'axios';
 
 const initialValue = Value.fromJSON({
@@ -57,7 +57,7 @@ const mapLinks = (links, key) => {
                     <ul>
                         {
                             links.map(item => {
-                                return <li className="borderless" key={item.rank}><a href="#"><img alt={item.title} src={item.link} /></a></li>
+                                return <li className="borderless" key={item.rank}><a target="_" href={item.link}><img alt={item.title} src={item.link} /></a></li>
                             })
                         }
                     </ul>
@@ -147,7 +147,7 @@ const Results = (props) => {
     if ( !links.length && !isEmpty ) {
         return (
             <div className="c-inital">
-                Select a Section and Press <em>Ctrl+H</em> to analysis
+                Select a Section and Press <em>Ctrl+H</em> to analyse
             </div>
         )
     }
@@ -352,6 +352,10 @@ export default class TextEditor extends Component {
         // })
         // console.log('keyword', JSON.stringify([keyword]))
 
+        // this.setState({
+        //     links: []
+        // })
+
         let formData = new FormData()
         formData.set('keywords', JSON.stringify([keyword]))
 
@@ -368,7 +372,7 @@ export default class TextEditor extends Component {
             // const _links = JSON.parse(data.links)
             const _links = data.links
 
-            console.log(_links)
+            // console.log(_links)
 
             this.toggleLoading()
 
